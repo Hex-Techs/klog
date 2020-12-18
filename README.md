@@ -97,3 +97,16 @@ Google, not here. The code in this repo is for export only and is not itself
 under development. Feature requests will be ignored.
 
 Send bug reports to golang-nuts@googlegroups.com.
+
+----
+
+New Feature
+===========
+- add Tag
+```
+you can use like this:
+klog.InfoTag(klog.KlogTag("TestTAG"), "This is a test for InfoTag.")
+
+> print: 
+2020-12-18 15:53:34.176 CST   60911 [INFO] klog_tag_test.go:8] TestTAG: This is a test for InfoTag.
+```
