@@ -1,4 +1,4 @@
-module github.com/ymichaelson/klog
+module github.com/hex-techs/klog
 
 go 1.13
 

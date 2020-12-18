@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	"github.com/ymichaelson/klog"
+	"github.com/hex-techs/klog"
 )
 
 // New returns a logr.Logger which is implemented by klog.

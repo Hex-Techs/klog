@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ymichaelson/klog"
+	"github.com/hex-techs/klog"
 
 	"github.com/go-logr/logr"
 )
