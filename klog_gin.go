@@ -26,13 +26,13 @@ var (
 )
 
 // ErrorLogger returns an ErrorLoggerT with parameter gin.ErrorTypeAny
-func ErrorLogger() gin.HandlerFunc {
-	return ErrorLoggerT(gin.ErrorTypeAny)
+func GinErrorLogger() gin.HandlerFunc {
+	return GinErrorLoggerT(gin.ErrorTypeAny)
 }
 
-// ErrorLoggerT returns an ErrorLoggerT middleware with the given
+// GinErrorLoggerT returns an GinErrorLoggerT middleware with the given
 // type gin.ErrorType.
-func ErrorLoggerT(typ gin.ErrorType) gin.HandlerFunc {
+func GinErrorLoggerT(typ gin.ErrorType) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
@@ -53,7 +53,7 @@ func ErrorLoggerT(typ gin.ErrorType) gin.HandlerFunc {
 //        router := gin.New()
 //        router.Use(gin.Recovery())
 //        router.Use(klog.Logger(3 * time.Second))
-func Logger(duration time.Duration) gin.HandlerFunc {
+func GinLogger(duration time.Duration) gin.HandlerFunc {
 	setupLogging(duration)
 	return func(c *gin.Context) {
 		t := time.Now()
