@@ -76,7 +76,7 @@ func GinLogger(duration time.Duration) gin.HandlerFunc {
 					statusColor, statusCode, reset,
 					latency,
 					clientIP,
-					methodColor, reset, method,
+					methodColor, method, reset,
 					path,
 					c.Errors.String(),
 				)
@@ -87,7 +87,7 @@ func GinLogger(duration time.Duration) gin.HandlerFunc {
 					statusColor, statusCode, reset,
 					latency,
 					clientIP,
-					methodColor, reset, method,
+					methodColor, method, reset,
 					path,
 					c.Errors.String(),
 				)
@@ -97,7 +97,7 @@ func GinLogger(duration time.Duration) gin.HandlerFunc {
 				statusColor, statusCode, reset,
 				latency,
 				clientIP,
-				methodColor, reset, method,
+				methodColor, method, reset,
 				path,
 				c.Errors.String(),
 			)
