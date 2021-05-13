@@ -117,6 +117,13 @@ var severityName = []string{
 	fatalLog:   "FATAL",
 }
 
+var severityNameWithColor = []string{
+	infoLog:    cyan + severityName[infoLog] + reset,
+	warningLog: yellow + severityName[warningLog] + reset,
+	errorLog:   red + severityName[errorLog] + reset,
+	fatalLog:   red + severityName[fatalLog] + reset,
+}
+
 // get returns the value of the severity.
 func (s *severity) get() severity {
 	return severity(atomic.LoadInt32((*int32)(s)))
@@ -630,7 +637,7 @@ func (l *loggingT) formatHeader(s severity, file string, line int) *buffer {
 	buf.tmp[8] = ' '
 	buf.tmp[9] = '['
 	buf.Write(buf.tmp[:10])
-	buf.WriteString(severityName[s])
+	buf.WriteString(severityNameWithColor[s])
 	buf.tmp[0] = ']'
 	buf.tmp[1] = ' '
 	buf.Write(buf.tmp[:2])
