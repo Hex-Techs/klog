@@ -443,6 +443,8 @@ func InitFlags(flagset *flag.FlagSet) {
 	flagset.Var(&logging.stderrThreshold, "stderrthreshold", "logs at or above this threshold go to stderr")
 	flagset.Var(&logging.vmodule, "vmodule", "comma-separated list of pattern=N settings for file-filtered logging")
 	flagset.Var(&logging.traceLocation, "log_backtrace_at", "when logging hits line file:N, emit a stack trace")
+	flagset.StringVar(&logging.ginMode, "gin_mode", logging.ginMode, "If set, overwrite gin mode. Optional: debug, release, test")
+	flagset.StringVar(&logging.gormMode, "gorm_mode", logging.gormMode, "If set, overwrite gorm mode. Optional: default, no, detailed")
 }
 
 // Flush flushes all pending log I/O.
@@ -512,6 +514,12 @@ type loggingT struct {
 
 	// If set, all output will be redirected unconditionally to the provided logr.Logger
 	logr logr.Logger
+
+	// Is set, go-gin mode will be overwrite.
+	ginMode string
+
+	// If set, GORM log mode will be orverwrite.
+	gormMode string
 }
 
 // buffer holds a byte Buffer for reuse. The zero value is ready for use.

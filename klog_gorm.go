@@ -16,3 +16,18 @@ type GormLogger struct {
 func (logger GormLogger) Print(values ...interface{}) {
 	logger.Infoln(gorm.LogFormatter(values...)...)
 }
+
+func GormLoggerWithMode(db *gorm.DB) GormLogWriter {
+	switch logging.gormMode {
+	case "default":
+		db.LogMode(true)
+	case "no":
+		db.LogMode(false)
+	case "detailed":
+		db.LogMode(true)
+	default:
+		db.LogMode(true)
+	}
+
+	return &GormLogger{V(0)}
+}

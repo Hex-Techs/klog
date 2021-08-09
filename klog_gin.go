@@ -139,3 +139,12 @@ func colorForMethod(method string) string {
 		return reset
 	}
 }
+
+func init() {
+	switch logging.ginMode {
+	case gin.DebugMode, gin.ReleaseMode, gin.TestMode:
+		gin.SetMode(logging.ginMode)
+	default:
+		gin.SetMode(gin.DebugMode)
+	}
+}
