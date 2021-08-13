@@ -2,32 +2,12 @@ package klog
 
 import "github.com/jinzhu/gorm"
 
-var DefaultGormLogger = GormLogger{V(0)}
-
-// GormLogWriter log writer interface
-type GormLogWriter interface {
-	Infoln(v ...interface{})
-}
+var DefaultGormLogger = GormLogger{depth: 9}
 
 type GormLogger struct {
-	GormLogWriter
+	depth int
 }
 
 func (logger GormLogger) Print(values ...interface{}) {
-	logger.Infoln(gorm.LogFormatter(values...)...)
-}
-
-func GormLoggerWithMode(db *gorm.DB) GormLogWriter {
-	switch logging.gormMode {
-	case "default":
-		db.LogMode(true)
-	case "no":
-		db.LogMode(false)
-	case "detailed":
-		db.LogMode(true)
-	default:
-		db.LogMode(true)
-	}
-
-	return &GormLogger{V(0)}
+	InfoDepth(logger.depth, gorm.LogFormatter(values...)...)
 }
