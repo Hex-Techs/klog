@@ -106,6 +106,65 @@ func GinLogger(duration time.Duration) gin.HandlerFunc {
 	}
 }
 
+func GinLoggerWithOutPaths(duration time.Duration, paths map[string]bool) gin.HandlerFunc {
+	setupLogging(duration)
+	return func(c *gin.Context) {
+		t := time.Now()
+
+		// process request
+		c.Next()
+
+		latency := time.Since(t)
+		clientIP := c.ClientIP()
+		method := c.Request.Method
+		statusCode := c.Writer.Status()
+		statusColor := colorForStatus(statusCode)
+		methodColor := colorForMethod(method)
+		path := c.Request.URL.Path
+
+		if nolog, ok := paths[path]; ok {
+			if nolog {
+				return
+			}
+		}
+
+		switch {
+		case statusCode >= 400 && statusCode <= 499:
+			{
+				Warningf("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
+					statusColor, statusCode, reset,
+					latency,
+					clientIP,
+					methodColor, method, reset,
+					path,
+					c.Errors.String(),
+				)
+			}
+		case statusCode >= 500:
+			{
+				Errorf("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
+					statusColor, statusCode, reset,
+					latency,
+					clientIP,
+					methodColor, method, reset,
+					path,
+					c.Errors.String(),
+				)
+			}
+		default:
+			V(0).Infof("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
+				statusColor, statusCode, reset,
+				latency,
+				clientIP,
+				methodColor, method, reset,
+				path,
+				c.Errors.String(),
+			)
+		}
+
+	}
+}
+
 func colorForStatus(code int) string {
 	switch {
 	case code >= 200 && code <= 299:
