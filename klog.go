@@ -108,8 +108,6 @@ const (
 	numSeverity = 4
 )
 
-const severityChar = "IWEF"
-
 var severityName = []string{
 	infoLog:    "INFO",
 	warningLog: "WARNING",
@@ -118,10 +116,10 @@ var severityName = []string{
 }
 
 var severityNameWithColor = []string{
-	infoLog:    cyan + severityName[infoLog] + reset,
-	warningLog: yellow + severityName[warningLog] + reset,
-	errorLog:   red + severityName[errorLog] + reset,
-	fatalLog:   red + severityName[fatalLog] + reset,
+	infoLog:    HighlightCyan + severityName[infoLog] + Reset,
+	warningLog: HighlightYellow + severityName[warningLog] + Reset,
+	errorLog:   BlinkingRed + severityName[errorLog] + Reset,
+	fatalLog:   BlinkingRed + severityName[fatalLog] + Reset,
 }
 
 // get returns the value of the severity.
@@ -420,6 +418,21 @@ func init() {
 	logging.skipHeaders = false
 	logging.addDirHeader = false
 	logging.skipLogHeaders = false
+	logging.enableColor = false
+	logging.color = color{
+		dataColor: HighlightYellow,
+		timeColor: HighlightGreen,
+		zoneColor: HighlightBlue,
+		pidColor:  HighlightWhite,
+		levleColor: levelColor{
+			info:   HighlightCyan + severityName[infoLog] + Reset,
+			waring: HighlightYellow + severityName[warningLog] + Reset,
+			err:    BlinkingRed + severityName[errorLog] + Reset,
+			fatal:  BlinkingRed + severityName[fatalLog] + Reset,
+		},
+		fileColor: HighlightMagenta,
+		msgColor:  HighlightGreen,
+	}
 	go logging.flushDaemon()
 }
 
@@ -444,7 +457,6 @@ func InitFlags(flagset *flag.FlagSet) {
 	flagset.Var(&logging.vmodule, "vmodule", "comma-separated list of pattern=N settings for file-filtered logging")
 	flagset.Var(&logging.traceLocation, "log_backtrace_at", "when logging hits line file:N, emit a stack trace")
 	flagset.StringVar(&logging.ginMode, "gin_mode", logging.ginMode, "If set, overwrite gin mode. Optional: debug, release, test")
-	flagset.StringVar(&logging.gormMode, "gorm_mode", logging.gormMode, "If set, overwrite gorm mode. Optional: default, no, detailed")
 }
 
 // Flush flushes all pending log I/O.
@@ -518,8 +530,10 @@ type loggingT struct {
 	// Is set, go-gin mode will be overwrite.
 	ginMode string
 
-	// If set, GORM log mode will be orverwrite.
-	gormMode string
+	// If true, ouput log with color.
+	enableColor bool
+
+	color color
 }
 
 // buffer holds a byte Buffer for reuse. The zero value is ready for use.
@@ -638,23 +652,28 @@ func (l *loggingT) formatHeader(s severity, file string, line int) *buffer {
 	// hour, minute, second := now.Clock()
 	// Lmmdd hh:mm:ss.uuuuuu threadid file:line]
 
-	tmp := now.Format("2006-01-02 15:04:05.999 MST")
-	buf.WriteString(tmp)
-	buf.tmp[0] = ' '
-	buf.nDigits(7, 1, pid, ' ') // TODO: should be TID
-	buf.tmp[8] = ' '
-	buf.tmp[9] = '['
-	buf.Write(buf.tmp[:10])
-	buf.WriteString(severityNameWithColor[s])
-	buf.tmp[0] = ']'
-	buf.tmp[1] = ' '
-	buf.Write(buf.tmp[:2])
-	buf.WriteString(file)
-	buf.tmp[0] = ':'
-	n := buf.someDigits(1, line)
-	buf.tmp[n+1] = ']'
-	buf.tmp[n+2] = ' '
-	buf.Write(buf.tmp[:n+3])
+	if l.enableColor {
+		l.colorHeader(buf, now, s, file, line)
+	} else {
+		zone, _ := now.Zone()
+		tmp := fmt.Sprintf("%04d-%02d-%02d %02d:%02d:%02d.%03d %s", now.Year(), int(now.Month()), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond()/1000/1000, zone)
+		buf.WriteString(tmp)
+		buf.tmp[0] = ' '
+		buf.nDigits(7, 1, pid, ' ') // TODO: should be TID
+		buf.tmp[8] = ' '
+		buf.tmp[9] = '['
+		buf.Write(buf.tmp[:10])
+		buf.WriteString(severityNameWithColor[s])
+		buf.tmp[0] = ']'
+		buf.tmp[1] = ' '
+		buf.Write(buf.tmp[:2])
+		buf.WriteString(file)
+		buf.tmp[0] = ':'
+		n := buf.someDigits(1, line)
+		buf.tmp[n+1] = ']'
+		buf.tmp[n+2] = ' '
+		buf.Write(buf.tmp[:n+3])
+	}
 	return buf
 }
 
@@ -663,7 +682,7 @@ func (l *loggingT) formatHeader(s severity, file string, line int) *buffer {
 const digits = "0123456789"
 
 // twoDigits formats a zero-prefixed two-digit integer at buf.tmp[i].
-func (buf *buffer) twoDigits(i, d int) {
+func (buf *buffer) TwoDigits(i, d int) {
 	buf.tmp[i+1] = digits[d%10]
 	d /= 10
 	buf.tmp[i] = digits[d%10]
@@ -712,6 +731,10 @@ func (l *loggingT) println(s severity, logr logr.Logger, args ...interface{}) {
 }
 
 func (l *loggingT) print(s severity, logr logr.Logger, args ...interface{}) {
+	if l.enableColor {
+		args = append([]interface{}{l.color.msgColor}, args...)
+		args = append(args, Reset)
+	}
 	l.printDepth(s, logr, 1, args...)
 }
 
@@ -737,6 +760,9 @@ func (l *loggingT) printf(s severity, logr logr.Logger, format string, args ...i
 	if logr != nil {
 		l.putBuffer(buf)
 		buf = l.getBuffer()
+	}
+	if l.enableColor {
+		format = l.color.msgColor + format + Reset
 	}
 	fmt.Fprintf(buf, format, args...)
 	if buf.Bytes()[buf.Len()-1] != '\n' {
@@ -1223,9 +1249,8 @@ func (l *loggingT) setV(pc uintptr) Level {
 	fn := runtime.FuncForPC(pc)
 	file, _ := fn.FileLine(pc)
 	// The file is something like /a/b/c/d.go. We want just the d.
-	if strings.HasSuffix(file, ".go") {
-		file = file[:len(file)-3]
-	}
+	file = strings.TrimSuffix(file, ".go")
+
 	if slash := strings.LastIndex(file, "/"); slash >= 0 {
 		file = file[slash+1:]
 	}
@@ -1534,4 +1559,8 @@ func KRef(namespace, name string) ObjectRef {
 		Name:      name,
 		Namespace: namespace,
 	}
+}
+
+func EnableColor(enable bool) {
+	logging.enableColor = enable
 }

@@ -14,17 +14,6 @@ func setupLogging(duration time.Duration) {
 	}()
 }
 
-var (
-	green   = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
-	white   = string([]byte{27, 91, 57, 48, 59, 52, 55, 109})
-	yellow  = string([]byte{27, 91, 57, 55, 59, 52, 51, 109})
-	red     = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
-	blue    = string([]byte{27, 91, 57, 55, 59, 52, 52, 109})
-	magenta = string([]byte{27, 91, 57, 55, 59, 52, 53, 109})
-	cyan    = string([]byte{27, 91, 57, 55, 59, 52, 54, 109})
-	reset   = string([]byte{27, 91, 48, 109})
-)
-
 // ErrorLogger returns an ErrorLoggerT with parameter gin.ErrorTypeAny
 func GinErrorLogger() gin.HandlerFunc {
 	return GinErrorLoggerT(gin.ErrorTypeAny)
@@ -73,10 +62,10 @@ func GinLogger(duration time.Duration) gin.HandlerFunc {
 		case statusCode >= 400 && statusCode <= 499:
 			{
 				Warningf("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
-					statusColor, statusCode, reset,
+					statusColor, statusCode, Reset,
 					latency,
 					clientIP,
-					methodColor, method, reset,
+					methodColor, method, Reset,
 					path,
 					c.Errors.String(),
 				)
@@ -84,20 +73,20 @@ func GinLogger(duration time.Duration) gin.HandlerFunc {
 		case statusCode >= 500:
 			{
 				Errorf("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
-					statusColor, statusCode, reset,
+					statusColor, statusCode, Reset,
 					latency,
 					clientIP,
-					methodColor, method, reset,
+					methodColor, method, Reset,
 					path,
 					c.Errors.String(),
 				)
 			}
 		default:
 			V(0).Infof("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
-				statusColor, statusCode, reset,
+				statusColor, statusCode, Reset,
 				latency,
 				clientIP,
-				methodColor, method, reset,
+				methodColor, method, Reset,
 				path,
 				c.Errors.String(),
 			)
@@ -132,10 +121,10 @@ func GinLoggerWithOutPaths(duration time.Duration, paths map[string]bool) gin.Ha
 		case statusCode >= 400 && statusCode <= 499:
 			{
 				Warningf("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
-					statusColor, statusCode, reset,
+					statusColor, statusCode, Reset,
 					latency,
 					clientIP,
-					methodColor, method, reset,
+					methodColor, method, Reset,
 					path,
 					c.Errors.String(),
 				)
@@ -143,20 +132,20 @@ func GinLoggerWithOutPaths(duration time.Duration, paths map[string]bool) gin.Ha
 		case statusCode >= 500:
 			{
 				Errorf("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
-					statusColor, statusCode, reset,
+					statusColor, statusCode, Reset,
 					latency,
 					clientIP,
-					methodColor, method, reset,
+					methodColor, method, Reset,
 					path,
 					c.Errors.String(),
 				)
 			}
 		default:
 			V(0).Infof("[GIN] |%s %3d %s| %12v | %s |%s  %s %-7s %s\n%s",
-				statusColor, statusCode, reset,
+				statusColor, statusCode, Reset,
 				latency,
 				clientIP,
-				methodColor, method, reset,
+				methodColor, method, Reset,
 				path,
 				c.Errors.String(),
 			)
@@ -168,34 +157,34 @@ func GinLoggerWithOutPaths(duration time.Duration, paths map[string]bool) gin.Ha
 func colorForStatus(code int) string {
 	switch {
 	case code >= 200 && code <= 299:
-		return green
+		return HighlightGreen
 	case code >= 300 && code <= 399:
-		return white
+		return HighlightWhite
 	case code >= 400 && code <= 499:
-		return yellow
+		return HighlightYellow
 	default:
-		return red
+		return BlinkingRed
 	}
 }
 
 func colorForMethod(method string) string {
 	switch {
 	case method == "GET":
-		return blue
+		return HighlightBlue
 	case method == "POST":
-		return cyan
+		return HighlightCyan
 	case method == "PUT":
-		return yellow
+		return HighlightYellow
 	case method == "DELETE":
-		return red
+		return HighlightRed
 	case method == "PATCH":
-		return green
+		return HighlightGreen
 	case method == "HEAD":
-		return magenta
+		return HighlightMagenta
 	case method == "OPTIONS":
-		return white
+		return HighlightWhite
 	default:
-		return reset
+		return Reset
 	}
 }
 
