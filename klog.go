@@ -457,6 +457,7 @@ func InitFlags(flagset *flag.FlagSet) {
 	flagset.Var(&logging.vmodule, "vmodule", "comma-separated list of pattern=N settings for file-filtered logging")
 	flagset.Var(&logging.traceLocation, "log_backtrace_at", "when logging hits line file:N, emit a stack trace")
 	flagset.StringVar(&logging.ginMode, "gin_mode", logging.ginMode, "If set, overwrite gin mode. Optional: debug, release, test")
+	flagset.DurationVar(&logging.flushFrequency, "log_flush_frequency", 5*time.Second, "Maximum number of seconds between log flushes")
 }
 
 // Flush flushes all pending log I/O.
@@ -532,6 +533,9 @@ type loggingT struct {
 
 	// If true, ouput log with color.
 	enableColor bool
+
+	// flushFrequency is the minimum interval for controlling flush all pending log I/O.
+	flushFrequency time.Duration
 
 	color color
 }

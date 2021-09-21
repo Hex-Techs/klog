@@ -9,18 +9,13 @@ import (
 	"github.com/spf13/pflag"
 )
 
-const logFlushFreqFlagName = "log-flush-frequency"
-
-var logFlushFreq = pflag.Duration(logFlushFreqFlagName, 5*time.Second, "Maximum number of seconds between log flushes")
-
 func AddGlobalFlags(fs *pflag.FlagSet, name string) {
 	addKlogFlags(fs)
-	addLogFlushFlags(fs)
 
 	fs.BoolP("help", "h", false, fmt.Sprintf("help for %s", name))
 }
 
-// addKlogFlags adds flags from k8s.io/klog
+// addKlogFlags adds flags from klog
 func addKlogFlags(fs *pflag.FlagSet) {
 	local := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	InitFlags(local)
@@ -31,6 +26,6 @@ func addKlogFlags(fs *pflag.FlagSet) {
 	})
 }
 
-func addLogFlushFlags(fs *pflag.FlagSet) {
-	fs.AddFlag(pflag.Lookup(logFlushFreqFlagName))
+func FlushSchedule(fn func(flush func(), frequency time.Duration)) {
+	go fn(Flush, logging.flushFrequency)
 }
