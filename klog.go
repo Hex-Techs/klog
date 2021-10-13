@@ -659,18 +659,7 @@ func (l *loggingT) formatHeader(s severity, file string, line int) *buffer {
 	if l.enableColor {
 		l.colorHeader(buf, now, s, file, line)
 	} else {
-		zone, _ := now.Zone()
-		tmp := fmt.Sprintf("%04d-%02d-%02d %02d:%02d:%02d.%03d %s", now.Year(), int(now.Month()), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond()/1000/1000, zone)
-		buf.WriteString(tmp)
-		buf.tmp[0] = ' '
-		buf.nDigits(7, 1, pid, ' ') // TODO: should be TID
-		buf.tmp[8] = ' '
-		buf.tmp[9] = '['
-		buf.Write(buf.tmp[:10])
-		buf.WriteString(severityNameWithColor[s])
-		buf.tmp[0] = ']'
-		buf.tmp[1] = ' '
-		buf.Write(buf.tmp[:2])
+		l.formatHeaderTimestampSeverity(buf, s, now)
 		buf.WriteString(file)
 		buf.tmp[0] = ':'
 		n := buf.someDigits(1, line)
@@ -679,6 +668,21 @@ func (l *loggingT) formatHeader(s severity, file string, line int) *buffer {
 		buf.Write(buf.tmp[:n+3])
 	}
 	return buf
+}
+
+func (l *loggingT) formatHeaderTimestampSeverity(buf *buffer, s severity, now time.Time) {
+	zone, _ := now.Zone()
+	tmp := fmt.Sprintf("%04d-%02d-%02d %02d:%02d:%02d.%03d %s", now.Year(), int(now.Month()), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond()/1000/1000, zone)
+	buf.WriteString(tmp)
+	buf.tmp[0] = ' '
+	buf.nDigits(7, 1, pid, ' ') // TODO: should be TID
+	buf.tmp[8] = ' '
+	buf.tmp[9] = '['
+	buf.Write(buf.tmp[:10])
+	buf.WriteString(severityName[s])
+	buf.tmp[0] = ']'
+	buf.tmp[1] = ' '
+	buf.Write(buf.tmp[:2])
 }
 
 // Some custom tiny helper functions to print the log header efficiently.

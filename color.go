@@ -59,6 +59,14 @@ var (
 )
 
 func (l *loggingT) colorHeader(buf *buffer, t time.Time, s severity, file string, line int) {
+	l.colorFormatHeaderTimestampSeverity(buf, s, t)
+	buf.WriteString(l.color.colorFile(file, line))
+	buf.tmp[0] = ']'
+	buf.tmp[1] = ' '
+	buf.Write(buf.tmp[:2])
+}
+
+func (l *loggingT) colorFormatHeaderTimestampSeverity(buf *buffer, s severity, t time.Time) {
 	buf.WriteString(l.time(t))
 	buf.tmp[0] = ' '
 	buf.Write(buf.tmp[:1])
@@ -70,10 +78,6 @@ func (l *loggingT) colorHeader(buf *buffer, t time.Time, s severity, file string
 	buf.tmp[1] = '['
 	buf.Write(buf.tmp[:2])
 	buf.WriteString(l.color.level(s))
-	buf.tmp[0] = ']'
-	buf.tmp[1] = ' '
-	buf.Write(buf.tmp[:2])
-	buf.WriteString(l.color.colorFile(file, line))
 	buf.tmp[0] = ']'
 	buf.tmp[1] = ' '
 	buf.Write(buf.tmp[:2])
