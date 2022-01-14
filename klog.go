@@ -1572,3 +1572,17 @@ func KRef(namespace, name string) ObjectRef {
 func EnableColor(enable bool) {
 	logging.enableColor = enable
 }
+
+func GetEnvEnableColor() bool {
+	enableStr, exits := os.LookupEnv("ENABLE_KLOG_COLOR")
+	if !exits {
+		return false
+	}
+
+	enable, err := strconv.ParseBool(enableStr)
+	if err != nil {
+		return false
+	}
+
+	return enable
+}
